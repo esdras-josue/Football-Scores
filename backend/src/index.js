@@ -3,6 +3,7 @@ dotenv.config();
 const express = require('express');
 
 const cors = require('cors');
+const { match } = require("node:assert");
 
 
 const app = express();
@@ -13,8 +14,13 @@ app.use(express.json());
 app.get('/matches/top-leagues', async (req, res) => {
     try {
         const leagues = ["PL", "PD", "SA", "FL1", "CL"];
+        const {date} = req.query;
+
+        if(!date) {
+            return res.status(400).json({ message: "Date is required (YYYY-MM-DD)"});
+        }
         const request = leagues.map(code => 
-            fetch(`https://api.football-data.org/v4/competitions/${code}/matches?dateFrom=2026-04-04&dateTo=2026-04-05&status=SCHEDULED`, {
+            fetch(`https://api.football-data.org/v4/competitions/${code}/matches?dateFrom=${date}&dateTo=${date}&status=SCHEDULED,FINISHED`, {
                 headers: {
                     "X-Auth-Token": process.env.FOOTBALL_API_TOKEN
                 }
@@ -35,7 +41,8 @@ app.get('/matches/top-leagues', async (req, res) => {
                 date: match.utcDate,
                 status: match.status
             }))
-        }));
+        }))
+        .filter(league => league.matches.length > 0);
 
         res.json(formatted);
 
