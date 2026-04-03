@@ -1,48 +1,14 @@
 "use client";
-import { fetchTopLeagueMatches } from "../services/api";
-import { useEffect, useState } from "react";
 import MatchList from "../components/MatchList";
+import { useMatch } from "../MatchContext/MatchContext";
 
 export default function Dashboard() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [date, setDate] = useState(() => {
-    return new Date().toISOString().split("T")[0];
-  });
-
-  // change day
-  const changeDay = (days: number) => {
-    const newDate = new Date(date);
-    newDate.setDate(newDate.getDate() + days);
-    setDate(newDate.toISOString().split("T")[0]);
-  };
-
-  // formmated date
-  const formatDate = (date: string) => {
-    const today = new Date().toISOString().split("T")[0];
-
-    if (date === today) return "Today";
-
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    if (date === tomorrow.toISOString().split("T")[0]) return "Tomorrow";
-
-    return new Date(date).toLocaleDateString();
-  };
-
-  useEffect(() => {
-    fetchTopLeagueMatches(date)
-      .then((data) => setData(data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [date]);
+  const { data, loading, date, changeDay, formatDate} = useMatch();
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0B2A18] text-white p-5">
-        <h1 className="text-xl font-bold mb-6">Football City </h1>
+        <h1 className="text-xl font-bold mb-6">Football City🏢 </h1>
         <p className="text-gray-400">Cargando partidos...</p>
       </div>
     );
@@ -60,7 +26,7 @@ export default function Dashboard() {
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative w-full max-w-3xl p-5">
 
-        <h1 className="text-2xl font-bold mb-4 text-center">Footbal City</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">Footbal City🏢</h1>
 
       <div className="flex items-center justify-between mb-4 bg-[#163629] p-2 rounded">
         <button

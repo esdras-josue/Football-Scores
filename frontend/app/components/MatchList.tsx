@@ -1,9 +1,11 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { League } from "../types/Leagues";
+import { Match } from "../types/Match";
 
 type Props = {
-  data: any[];
+  data: League[];
 };
 
 export default function MatchList({ data }: Props) {
@@ -19,7 +21,7 @@ export default function MatchList({ data }: Props) {
           </h2>
 
           {/*⚽ Matches */}
-          {league.matches.map((match: any) => (
+          {league.matches.map((match: Match) => (
             <div
               key={match.id}
               className="flex items-center justify-between bg-[#163629] px-3 py-2 rounded-md mb-1 text-sm"
@@ -44,11 +46,6 @@ export default function MatchList({ data }: Props) {
                       minute: "2-digit",
                     })}
               </div>
-
-              {match.status === "FINISHED" && (
-                <span className="ml-2 text-xs text-gray-300">FT</span>
-              )}
-
               {/* AwayTeam */}
               <div className="flex items-center justify-end gap-2 w-[40%]">
                 <Image
@@ -59,7 +56,7 @@ export default function MatchList({ data }: Props) {
                 />
                 <span className="truncate">{match.awayTeam}</span>
 
-                <span className="ml-2 text-xs text-gray-400">
+                <span className="ml-2 text-xs text-gray-400 text-left">
                   {match.status === "FINISHED" && "FT"}
                 </span>
               </div>
