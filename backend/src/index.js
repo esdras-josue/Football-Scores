@@ -3,7 +3,8 @@ dotenv.config();
 const express = require('express');
 
 const cors = require('cors');
-const { match } = require("node:assert");
+const cache = new Map();
+const TTL = 1000 * 60 * 5; // 5 minutos
 
 
 const app = express();
@@ -19,6 +20,21 @@ app.get('/matches/top-leagues', async (req, res) => {
         if(!date) {
             return res.status(400).json({ message: "Date is required (YYYY-MM-DD)"});
         }
+
+        const key = `matches:${date}`;
+        const cached = cache.get(key);
+
+        if (cached) {
+            const isValid = Date.now() - cached.timeStamp  < TTL;
+
+            if(isValid) {
+                console.log("CACHE HIT");
+                return res.json(cached.data);
+            } else {
+                cache.delete(key);
+            }
+        }
+
         const request = leagues.map(code => 
             fetch(`https://api.football-data.org/v4/competitions/${code}/matches?dateFrom=${date}&dateTo=${date}&status=SCHEDULED,FINISHED`, {
                 headers: {
@@ -43,6 +59,11 @@ app.get('/matches/top-leagues', async (req, res) => {
             }))
         }))
         .filter(league => league.matches.length > 0);
+
+        cache.set(key,{ 
+            data: formatted,
+            timeStamp: Date.now()
+        });
 
         res.json(formatted);
 

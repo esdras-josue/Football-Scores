@@ -18,30 +18,48 @@ export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const [date, setDate] = useState(() => {
-    return new Date().toISOString().split("T")[0];
+    return new Date().toLocaleDateString('en-CA');
   });
 
   const changeDay = (days: number) => {
-    const newDate = new Date(date);
+    const [ year, month, day] = date.split('-').map(Number);
+    const newDate = new Date(year, month -1, day);
+
     newDate.setDate(newDate.getDate() + days);
-    setDate(newDate.toISOString().split("T")[0]);
+
+    const y = newDate.getFullYear();
+    const m = String(newDate.getMonth() + 1).padStart(2, '0');
+    const d = String(newDate.getDate()).padStart(2, '0');
+
+    setDate(`${y}-${m}-${d}`);
   };
 
   const formatDate = (date: string) => {
-    const today = new Date().toISOString().split("T")[0];
 
-    if (date === today) return "Today";
+    const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+    };
+
+    const now = new Date();
+    const todayStr = now.toLocaleDateString('en-CA');
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toLocaleDateString('en-CA');
 
-    if (date === tomorrow.toISOString().split("T")[0]) return "Tomorrow";
+    if (date === todayStr) return "Today";
+    if (date === tomorrowStr) return "Tomorrow";
 
-    return new Date(date).toLocaleDateString();
+    const [year, month, day] = date.split('-').map(Number);
+    const finalDate = new Date(year, month - 1, day);
+
+    return finalDate.toLocaleDateString(window.navigator.language, options) 
   };
 
   useEffect(() => {
-    setLoading(true);
+    //setLoading(true);
 
     fetchTopLeagueMatches(date)
       .then((data) => setData(data))
